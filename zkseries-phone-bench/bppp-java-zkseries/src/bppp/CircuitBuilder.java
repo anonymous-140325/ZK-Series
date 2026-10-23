@@ -56,6 +56,9 @@ public final class CircuitBuilder {
 
         public Lin add(long c) { Lin r = copy(); r.constant = r.constant.add(Group.of(c)); return r; }
 
+        /** c * this. */
+        public Lin times(long c) { return new Lin().combine(this, Group.of(c)); }
+
         Lin copy() { Lin r = new Lin(); r.terms.putAll(terms); r.constant = constant; return r; }
 
         private Lin combine(Lin o, Scalar k) {

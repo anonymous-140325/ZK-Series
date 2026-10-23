@@ -16,8 +16,8 @@ final multiplication with each generator's coefficients unmerged.
 
 **Same proofs.** For the same seeds and statement, this version and `bppp-java-zkseries` produce
 byte-identical proofs (checked for N = 1, 50 and 300, three seeds each, by hashing the four
-commitments and the norm argument's messages). Its own checks: `bpppref.Check`, 142 (the
-optimized version's 144 minus its two thread checks). The changes for 16-bit readings (one range
+commitments and the norm argument's messages). Its own checks: `bpppref.Check`, 312 (the
+optimized version's 314 minus its two thread checks). The changes for 16-bit readings (one range
 statement per value when B = 2^16 - 1, and B = 2^16 - 1 allowed) are made in both versions alike.
 
     java -cp "build;../SharpRangeProofs-Code/lib/*" bpppref.AuthBench range 20 50,100,150,200,250,300

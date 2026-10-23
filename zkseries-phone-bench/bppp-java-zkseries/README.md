@@ -55,9 +55,9 @@ does not follow the paper's box, so it cannot serve as a line-by-line reference.
 | `bppp/BpppProver.java` | ~355 | Section 5.3 and Section 6.3, line by line |
 | `bppp/BpppVerifier.java` | ~60 | the verifier, one multiscalar multiplication |
 | `bppp/CircuitBuilder.java` | ~300 | ranges (base 256), products and linear rows, compiled to Section 6.3 |
-| `bppp/ZkSeriesAuth.java` | ~250 | the authentication proof of the ZK-Series paper |
+| `bppp/ZkSeriesAuth.java` | ~450 | the authentication proof of the ZK-Series paper |
 | `bppp/AuthBench.java` | ~185 | the Table 6 harness |
-| `bppp/Check.java` | ~235 | completeness, soundness, tampering and thread checks |
+| `bppp/Check.java` | ~300 | completeness, soundness, tampering and thread checks |
 
 About 2,550 lines in all. The two classes in `com.weavechain.curve25519` sit in the
 library's package because they use its package-private arithmetic; they are therefore
@@ -115,13 +115,16 @@ place.
 
 ## Checks
 
-`bppp.Check`, 140 checks (pass with `-Dbppp.threads=1` and `8`): the norm argument for
+`bppp.Check`, 314 checks (pass with `-Dbppp.threads=1` and `8`): the norm argument for
 |n| = 8..64, and |n| < |l| refused; a norm argument with |n| = 2048, large enough for every
 parallel path, giving the same proof with 1 and 8 threads; ranges at both edges,
-refused and rejected above B; the |·|, max and product gadgets against false claims;
-each proof element tampered in turn; and the authentication proof for d_1, d_2, d_∞
-with the sum and DTW at m = 1 and 3 (verifies for θ = δ + 1, refused and rejected for
-θ = δ, rejected for another reading, invalid couplings refused).
+refused and rejected above B; the |·|, upper-bound, ERD-bit and product gadgets against
+false claims; each proof element tampered in turn; the authentication proof for d_1, d_2,
+d_∞ with the sum, DTW, discrete Fréchet, ERD and TWED at m = 1 and 3 (the coupling's cost
+equals `SeriesDist`'s distance; verifies for θ = δ + 1, refused and rejected for θ = δ,
+rejected for another reading, invalid couplings refused); and k = 2 of three base readings
+with DTW and Fréchet under the k-NN sum and max (repeated pairs and pairs outside the
+readings refused).
 
 Mutations that the checks catch: undoing the sign correction of item 2, removing δ
 from p_n(T), dropping the threshold range from the authentication circuit, dropping σ

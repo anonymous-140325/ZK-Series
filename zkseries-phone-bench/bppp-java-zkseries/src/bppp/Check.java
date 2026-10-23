@@ -166,12 +166,21 @@ public final class Check {
             boolean ok = new Inputs(x, y).run(cb -> ZkSeriesAuth.abs(cb, cb.input(0).sub(cb.input(1)), cb.isProver() ? a : null), claim != 250);
             check("|x - y| claimed as " + claim + (claim == 250 ? " verifies" : " is rejected"), ok == (claim == 250));
         }
-        for (long claim : new long[] { 30, 29, 31 }) {           // max(10, 30, 20) = 30
+        for (long claim : new long[] { 30, 31, 29 }) {           // max(10, 30, 20) = 30: any z >= 30 is an upper bound
             Scalar z = Group.of(claim);
-            boolean ok = new Inputs(10, 30, 20).run(cb -> ZkSeriesAuth.max(cb,
-                    new CircuitBuilder.Lin[] { cb.input(0), cb.input(1), cb.input(2) }, cb.isProver() ? z : null), claim != 30);
-            check("max claimed as " + claim + (claim == 30 ? " verifies" : " is rejected"), ok == (claim == 30));
+            boolean ok = new Inputs(10, 30, 20).run(cb -> ZkSeriesAuth.upper(cb,
+                    new CircuitBuilder.Lin[] { cb.input(0), cb.input(1), cb.input(2) }, cb.isProver() ? z : null,
+                    ZkSeriesAuth.READING_DIGITS), claim < 30);
+            check("upper bound on the max claimed as " + claim + (claim >= 30 ? " verifies" : " is rejected"), ok == (claim >= 30));
         }
+        long eps = 3000, dMax = (1L << 16) - 1;                  // ERD step: eps * b, b = 0 only if d <= eps
+        for (long d : new long[] { 1000, 5000 })
+            for (long bit : new long[] { 0, 1, 2 }) {
+                Scalar b = Group.of(bit);
+                boolean expect = bit == 1 || (bit == 0 && d <= eps);
+                boolean ok = new Inputs(d).run(cb -> ZkSeriesAuth.edr(cb, cb.input(0), eps, dMax, cb.isProver() ? b : null), !expect);
+                check("ERD bit " + bit + " for d = " + d + (expect ? " verifies" : " is rejected"), ok == expect);
+            }
         check("product: 6 * 7 = 42 verifies", new Inputs(6, 7, 42).run(cb -> cb.mulEq(cb.input(0), cb.input(1), cb.input(2)), false));
         check("product: 6 * 7 = 43 is rejected", !new Inputs(6, 7, 43).run(cb -> cb.mulEq(cb.input(0), cb.input(1), cb.input(2)), true));
     }
@@ -203,8 +212,15 @@ public final class Check {
 
     static void authentication() {
         for (int m : new int[] { 1, 3 })
-            for (SeriesDistType s : new SeriesDistType[] { SeriesDistType.SUM, SeriesDistType.DTW })
+            for (SeriesDistType s : SeriesDistType.values())
                 for (LocalDistType d : LocalDistType.values()) authCase(m, s, d);
+        for (SeriesDistType s : new SeriesDistType[] { SeriesDistType.DTW, SeriesDistType.FRECHET })
+            for (ZkSeriesAuth.Aggregate f : ZkSeriesAuth.Aggregate.values()) knnCase(s, f);
+    }
+
+    /** ERD's eps and TWED's lambda for readings in [0, B]; the sum, DTW and Frechet ignore it. */
+    static long param(SeriesDistType s, int m) {
+        return s == SeriesDistType.ERD ? 300L * m : s == SeriesDistType.TWED ? 500 : 0;
     }
 
     static long[][] reading(int T, int m) {
@@ -216,15 +232,16 @@ public final class Check {
     static void authCase(int m, SeriesDistType s, LocalDistType d) {
         String n = "auth " + s + " " + d + " m=" + m + ": ";
         int tx = 5, ty = s == SeriesDistType.SUM ? 5 : 4;
+        long p = param(s, m);
         long[][] x = reading(tx, m), y = reading(ty, m);
-        int[][] c = ZkSeriesAuth.coupling(s, d, x, y);
-        long cost = ZkSeriesAuth.cost(new ZkSeriesAuth.Statement(m, tx, ty, d, s, B, 1, c), x, y);
-        long dist = SeriesDist.distance(x, y, s, 0, (a, b) -> LocalDist.distance(a, b, d)).distance;
-        check(n + "the coupling is valid", ZkSeriesAuth.validCoupling(new ZkSeriesAuth.Statement(m, tx, ty, d, s, B, 1, c)));
+        int[][] c = ZkSeriesAuth.coupling(s, d, p, x, y);
+        long cost = ZkSeriesAuth.cost(new ZkSeriesAuth.Statement(m, tx, ty, d, s, B, 1, p, c), x, y);
+        long dist = SeriesDist.distance(x, y, s, p, (a, b) -> LocalDist.distance(a, b, d)).distance;
+        check(n + "the coupling is valid", ZkSeriesAuth.validCoupling(new ZkSeriesAuth.Statement(m, tx, ty, d, s, B, 1, p, c)));
         check(n + "its cost equals SeriesDist's distance", cost == dist);
 
-        ZkSeriesAuth.Statement st = new ZkSeriesAuth.Statement(m, tx, ty, d, s, B, cost + 1, c);
-        ZkSeriesAuth.Statement tight = new ZkSeriesAuth.Statement(m, tx, ty, d, s, B, cost, c);
+        ZkSeriesAuth.Statement st = new ZkSeriesAuth.Statement(m, tx, ty, d, s, B, cost + 1, p, c);
+        ZkSeriesAuth.Statement tight = new ZkSeriesAuth.Statement(m, tx, ty, d, s, B, cost, p, c);
         Scalar[] sV = new Scalar[st.inputs()];
         List<ECPoint> V = ZkSeriesAuth.commit(x, y, sV, rnd);
         Generators g = ZkSeriesAuth.generators(st);
@@ -238,10 +255,43 @@ public final class Check {
         List<ECPoint> V2 = new ArrayList<>(V);
         V2.set(V2.size() - 1, V2.get(V2.size() - 1).add(Generators.create(1).G));
         check(n + "another new reading is rejected", !ZkSeriesAuth.verify(g, st, V2, pf));
-        if (s == SeriesDistType.DTW) {
+        if (s != SeriesDistType.SUM) {
             int[][] skip = { { 0, 0 }, { 2, 1 }, { 3, 2 }, { 4, 3 } };                 // skips (1, *)
             check(n + "a coupling that skips a cell is not valid",
-                    !ZkSeriesAuth.validCoupling(new ZkSeriesAuth.Statement(m, tx, ty, d, s, B, 1L << 40, skip)));
+                    !ZkSeriesAuth.validCoupling(new ZkSeriesAuth.Statement(m, tx, ty, d, s, B, 1L << 40, p, skip)));
         }
+    }
+
+    /** k = 2 of three base readings against one new reading, by f* = sum or max. */
+    static void knnCase(SeriesDistType s, ZkSeriesAuth.Aggregate f) {
+        String n = "auth k=2 " + f + " " + s + ": ";
+        int m = 3;
+        LocalDistType d = LocalDistType.MANHATTAN;
+        long[][][] xs = { reading(5, m), reading(4, m), reading(6, m) }, ys = { reading(5, m) };
+        int[] tx = { 5, 4, 6 }, ty = { 5 };
+        int[][] pairs = { { 0, 0 }, { 2, 0 } };
+        int[][][] cs = { ZkSeriesAuth.coupling(s, d, xs[0], ys[0]), ZkSeriesAuth.coupling(s, d, xs[2], ys[0]) };
+        long d0 = SeriesDist.distance(xs[0], ys[0], s, 0, (a, b) -> LocalDist.distance(a, b, d)).distance;
+        long d2 = SeriesDist.distance(xs[2], ys[0], s, 0, (a, b) -> LocalDist.distance(a, b, d)).distance;
+        long want = f == ZkSeriesAuth.Aggregate.SUM ? d0 + d2 : Math.max(d0, d2);
+        long cost = ZkSeriesAuth.cost(new ZkSeriesAuth.Statement(m, tx, ty, d, s, B, 1, 0, f, pairs, cs), xs, ys);
+        check(n + "its cost equals f* of SeriesDist's distances", cost == want);
+
+        ZkSeriesAuth.Statement st = new ZkSeriesAuth.Statement(m, tx, ty, d, s, B, cost + 1, 0, f, pairs, cs);
+        ZkSeriesAuth.Statement tight = new ZkSeriesAuth.Statement(m, tx, ty, d, s, B, cost, 0, f, pairs, cs);
+        Scalar[] sV = new Scalar[st.inputs()];
+        List<ECPoint> V = ZkSeriesAuth.commit(xs, ys, sV, rnd);
+        Generators g = ZkSeriesAuth.generators(st);
+        BpppProver.Proof pf = ZkSeriesAuth.prove(g, st, xs, ys, sV, V, rnd);
+        check(n + "delta* < delta* + 1 verifies", ZkSeriesAuth.verify(g, st, V, pf));
+        Generators gt = ZkSeriesAuth.generators(tight);
+        BpppProver.Proof forced = BpppProver.proveCircuit(gt, ZkSeriesAuth.builderAll(tight, xs, ys, true), sV, V, rnd, false);
+        check(n + "theta = delta* proven anyway is rejected", !ZkSeriesAuth.verify(gt, tight, V, forced));
+        int[][] twice = { { 0, 0 }, { 0, 0 } };
+        check(n + "a repeated pair is not valid", !ZkSeriesAuth.validCoupling(
+                new ZkSeriesAuth.Statement(m, tx, ty, d, s, B, cost + 1, 0, f, twice, new int[][][] { cs[0], cs[0] })));
+        int[][] outside = { { 0, 0 }, { 3, 0 } };
+        check(n + "a pair outside the readings is not valid", !ZkSeriesAuth.validCoupling(
+                new ZkSeriesAuth.Statement(m, tx, ty, d, s, B, cost + 1, 0, f, outside, cs)));
     }
 }

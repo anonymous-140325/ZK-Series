@@ -45,7 +45,8 @@ Route B: Termux (measures OpenJDK, not Android's runtime)
 Checks (in the output files)
 ----------------------------
 - Every file header says "build variant : release" (Route A), never "DEBUG".
-- The check steps end with:  passed 144, failed 0.
+- The check steps end with:  passed 314, failed 0. (The logs in ../results were made
+  before the Frechet, ERD, TWED and k-NN circuits were added, and report 144.)
 - In the CASES RUN, each case-study file shows five rows:
     "blow, T=68 L=68"    N_m  512, bytes 768
     "shake, T=50 L=146"  N_m 2048, bytes 896
