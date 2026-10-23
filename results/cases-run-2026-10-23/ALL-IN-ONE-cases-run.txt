@@ -1,0 +1,129 @@
+######## COMBINED CASES RUN LOG (session log first, then each step file in run order)
+
+################################################################################
+######## FILE: CASES-RUN-20261023-120709.txt (session log)
+################################################################################
+device        : samsung SM-A715F
+soc           : QTI SM7150
+android       : 13 (API 33)
+abi           : arm64-v8a,armeabi-v7a,armeabi
+cores         : 8
+max heap      : 512 MB
+sustained perf: NOT SUPPORTED (expect drift)
+timing policy : burnIn=15000ms discard=5 seed=100001
+build variant : release
+timestamp     : 2026-10-23 12:07:09
+CASES RUN: 4 steps; cooldown before each: >= 120 s, then until thermal status 0
+and battery <= start + 1.0 C, at most 900 s
+PHONE_STATE start: thermal_status=0 (0 = none, 1 = light, 2 = moderate, 3+ = throttling), battery_temp_c=34.4, cpu_cur_khz=1248000;1248000;1248000;1248000;1248000;1248000;1324800;1324800, cpu_max_khz=1804800;1804800;1804800;1804800;1804800;1804800;2208000;2208000
+STEP 1/4 checks, BP++ optimized, 1 thread(s): cooling down ...
+COOLDOWN done after 120 s: thermal_status=0 (0 = none, 1 = light, 2 = moderate, 3+ = throttling), battery_temp_c=33.7, cpu_cur_khz=576000;576000;576000;576000;576000;576000;652800;652800, cpu_max_khz=1804800;1804800;1804800;1804800;1804800;1804800;2208000;2208000
+STEP 1/4 checks, BP++ optimized, 1 thread(s): start 12:09:09
+STEP 1/4 checks, BP++ optimized, 1 thread(s): ok 12:10:01
+STEP 2/4 checks, BP++ optimized, 8 thread(s): cooling down ...
+COOLDOWN done after 120 s: thermal_status=0 (0 = none, 1 = light, 2 = moderate, 3+ = throttling), battery_temp_c=32.9, cpu_cur_khz=576000;576000;576000;576000;576000;576000;652800;652800, cpu_max_khz=1804800;1804800;1804800;1804800;1804800;1804800;2208000;2208000
+STEP 2/4 checks, BP++ optimized, 8 thread(s): start 12:12:01
+STEP 2/4 checks, BP++ optimized, 8 thread(s): ok 12:12:49
+STEP 3/4 case studies, 1 thread(s): cooling down ...
+COOLDOWN done after 120 s: thermal_status=0 (0 = none, 1 = light, 2 = moderate, 3+ = throttling), battery_temp_c=32.4, cpu_cur_khz=576000;576000;576000;576000;576000;576000;652800;652800, cpu_max_khz=1804800;1804800;1804800;1804800;1804800;1804800;2208000;2208000
+STEP 3/4 case studies, 1 thread(s): start 12:14:49
+STEP 3/4 case studies, 1 thread(s): ok 12:20:09
+STEP 4/4 case studies, 8 thread(s): cooling down ...
+COOLDOWN done after 120 s: thermal_status=0 (0 = none, 1 = light, 2 = moderate, 3+ = throttling), battery_temp_c=32.2, cpu_cur_khz=576000;576000;576000;576000;576000;576000;652800;652800, cpu_max_khz=1804800;1804800;1804800;1804800;1804800;1804800;2208000;2208000
+STEP 4/4 case studies, 8 thread(s): start 12:22:09
+STEP 4/4 case studies, 8 thread(s): ok 12:25:09
+CASES RUN COMPLETE 2026-10-23 12:25:09
+
+################################################################################
+######## FILE: bppp.Check-t1-20261023-121001.txt
+################################################################################
+device        : samsung SM-A715F
+soc           : QTI SM7150
+android       : 13 (API 33)
+abi           : arm64-v8a,armeabi-v7a,armeabi
+cores         : 8
+max heap      : 512 MB
+sustained perf: NOT SUPPORTED (expect drift)
+timing policy : burnIn=15000ms discard=5 seed=100001
+build variant : release
+timestamp     : 2026-10-23 12:09:09
+thread cap    : 1 (BP++ harnesses only)
+arguments     : 
+PHONE_STATE before: thermal_status=0 (0 = none, 1 = light, 2 = moderate, 3+ = throttling), battery_temp_c=33.7, cpu_cur_khz=1248000;1248000;1248000;1248000;1248000;1248000;652800;652800, cpu_max_khz=1804800;1804800;1804800;1804800;1804800;1804800;2208000;2208000
+
+bppp-java-zkseries: passed 144, failed 0
+PHONE_STATE after: thermal_status=0 (0 = none, 1 = light, 2 = moderate, 3+ = throttling), battery_temp_c=33.5, cpu_cur_khz=768000;768000;768000;768000;768000;768000;2208000;2208000, cpu_max_khz=1804800;1804800;1804800;1804800;1804800;1804800;2208000;2208000
+
+################################################################################
+######## FILE: bppp.Check-t8-20261023-121249.txt
+################################################################################
+device        : samsung SM-A715F
+soc           : QTI SM7150
+android       : 13 (API 33)
+abi           : arm64-v8a,armeabi-v7a,armeabi
+cores         : 8
+max heap      : 512 MB
+sustained perf: NOT SUPPORTED (expect drift)
+timing policy : burnIn=15000ms discard=5 seed=100001
+build variant : release
+timestamp     : 2026-10-23 12:12:01
+thread cap    : 8 (BP++ harnesses only)
+arguments     : 
+PHONE_STATE before: thermal_status=0 (0 = none, 1 = light, 2 = moderate, 3+ = throttling), battery_temp_c=32.9, cpu_cur_khz=576000;1248000;1248000;1248000;1248000;1248000;652800;652800, cpu_max_khz=1804800;1804800;1804800;1804800;1804800;1804800;2208000;2208000
+
+bppp-java-zkseries: passed 144, failed 0
+PHONE_STATE after: thermal_status=0 (0 = none, 1 = light, 2 = moderate, 3+ = throttling), battery_temp_c=32.9, cpu_cur_khz=768000;768000;768000;768000;768000;768000;2208000;2208000, cpu_max_khz=1804800;1804800;1804800;1804800;1804800;1804800;2208000;2208000
+
+################################################################################
+######## FILE: bppp.AuthBench-t1-20261023-122009.txt
+################################################################################
+device        : samsung SM-A715F
+soc           : QTI SM7150
+android       : 13 (API 33)
+abi           : arm64-v8a,armeabi-v7a,armeabi
+cores         : 8
+max heap      : 512 MB
+sustained perf: NOT SUPPORTED (expect drift)
+timing policy : burnIn=15000ms discard=5 seed=100001
+build variant : release
+timestamp     : 2026-10-23 12:14:49
+thread cap    : 1 (BP++ harnesses only)
+arguments     : cases 10
+PHONE_STATE before: thermal_status=0 (0 = none, 1 = light, 2 = moderate, 3+ = throttling), battery_temp_c=32.4, cpu_cur_khz=576000;576000;576000;576000;576000;576000;652800;1324800, cpu_max_khz=1804800;1804800;1804800;1804800;1804800;1804800;2208000;2208000
+
+bppp-java-zkseries, mode cases, java 0, aarch64, 8 cores
+readings in [0, 65535], m = 3, reps = 10, discard = 5, threads = 1
+     n  row                digits  gates    N_m   prove (s)                 verify (s)                bytes
+    68  blow, T=68 L=68       280     68    512    0.7909 [0.7752-0.8346]    0.1189 [0.1073-0.1241]     768
+    50  shake, T=50 L=146    1178    435   2048    2.5549 [2.4904-2.6324]    0.3986 [0.3693-0.4352]     896
+    97  shake, T=97 L=193    1742    576   4096    4.6070 [4.5394-4.7061]    0.6418 [0.6186-0.6562]     960
+    42  face, T=42 L=85      2024    672   4096    4.6303 [4.5782-4.7117]    0.6681 [0.6445-0.6896]     960
+    44  face, T=44 L=87      2088    688   4096    4.6451 [4.5600-4.7027]    0.6823 [0.6603-0.6977]     960
+PHONE_STATE after: thermal_status=0 (0 = none, 1 = light, 2 = moderate, 3+ = throttling), battery_temp_c=32.3, cpu_cur_khz=1804800;768000;768000;768000;768000;768000;2208000;2208000, cpu_max_khz=1804800;1804800;1804800;1804800;1804800;1804800;2208000;2208000
+
+################################################################################
+######## FILE: bppp.AuthBench-t8-20261023-122509.txt
+################################################################################
+device        : samsung SM-A715F
+soc           : QTI SM7150
+android       : 13 (API 33)
+abi           : arm64-v8a,armeabi-v7a,armeabi
+cores         : 8
+max heap      : 512 MB
+sustained perf: NOT SUPPORTED (expect drift)
+timing policy : burnIn=15000ms discard=5 seed=100001
+build variant : release
+timestamp     : 2026-10-23 12:22:09
+thread cap    : 8 (BP++ harnesses only)
+arguments     : cases 10
+PHONE_STATE before: thermal_status=0 (0 = none, 1 = light, 2 = moderate, 3+ = throttling), battery_temp_c=32.2, cpu_cur_khz=1248000;1248000;1248000;1248000;1248000;1248000;1324800;1324800, cpu_max_khz=1804800;1804800;1804800;1804800;1804800;1804800;2208000;2208000
+
+bppp-java-zkseries, mode cases, java 0, aarch64, 8 cores
+readings in [0, 65535], m = 3, reps = 10, discard = 5, threads = 8
+     n  row                digits  gates    N_m   prove (s)                 verify (s)                bytes
+    68  blow, T=68 L=68       280     68    512    0.6842 [0.6407-0.6953]    0.1156 [0.1093-0.1358]     768
+    50  shake, T=50 L=146    1178    435   2048    1.4169 [1.3660-1.4580]    0.2508 [0.2382-0.2884]     896
+    97  shake, T=97 L=193    1742    576   4096    2.2192 [2.1237-2.2561]    0.3798 [0.3547-0.4135]     960
+    42  face, T=42 L=85      2024    672   4096    2.2681 [2.1449-2.6901]    0.4094 [0.3921-0.4392]     960
+    44  face, T=44 L=87      2088    688   4096    2.2384 [2.1568-2.2553]    0.3988 [0.3861-0.4278]     960
+PHONE_STATE after: thermal_status=0 (0 = none, 1 = light, 2 = moderate, 3+ = throttling), battery_temp_c=32.2, cpu_cur_khz=1804800;1804800;1804800;1804800;1804800;1804800;2208000;2208000, cpu_max_khz=1804800;1804800;1804800;1804800;1804800;1804800;2208000;2208000

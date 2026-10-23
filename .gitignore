@@ -1,0 +1,40 @@
+.DS_Store
+.~lock.*
+
+# Local machine paths / IDE state (leak usernames, e.g. C:\Users\<name>)
+local.properties
+.idea/
+.vscode/
+.settings/
+.classpath
+.project
+*.iml
+
+# Build output and caches
+build/
+bin/
+out/
+.gradle/
+.cxx/
+captures/
+__pycache__/
+*.class
+*.apk
+*.aab
+*.dex
+*.log
+
+# Signing keys / secrets
+*.keystore
+*.jks
+*.pem
+*.p12
+.env
+.env.*
+google-services.json
+
+# Scratch files from fixing the Go experiments
+*.orig
+*.patch
+*.rej
+*.fixed

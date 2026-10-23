@@ -1,0 +1,69 @@
+ZK-Series benchmarks on an Android phone -- reproducing Tables 5 and 6
+======================================================================
+
+The paper's measurements were taken on a Samsung Galaxy A71 with the Android app (Route A)
+in two sessions, whose unedited logs are in ../results:
+  - TABLES RUN (21 October 2026): Table 5 and the synthetic rows of Table 6, about 3 hours;
+  - CASES RUN (23 October 2026): the case-study rows of Table 6, about 30 minutes.
+Both are mostly unattended: the app waits for the phone to cool down between steps.
+
+Before starting
+---------------
+- Phone on mains power, airplane mode on, all other apps closed.
+- Screen stays on with the app in front for the whole run (the app keeps the screen
+  on by itself; do not switch apps, do not lock the phone).
+- Phone lying flat on a table, not in a case, at room temperature; not in the sun.
+- Start with a cool phone: leave it switched on and idle for 15 minutes first.
+- Uninstall any older build of the "ZK-Series Bench" app first.
+
+
+Route A: the Android app (Android Studio on a PC, phone connected by USB)
+-------------------------------------------------------------------------
+1. In Android Studio: File > Open > select the "android" folder.
+   Let it sync; accept creating the Gradle wrapper if asked.
+2. Build > Rebuild Project, then press Run (green triangle) with the phone selected.
+3. Tap CASES RUN or TABLES RUN. Leave the phone alone until the screen says
+     CASES RUN COMPLETE  (or TABLES RUN COMPLETE)
+4. Collect the files. With USB:
+     adb pull /sdcard/Android/data/org.zkseries.bench/files/
+   or, on the phone: Files app > Android > data > org.zkseries.bench > files.
+   There is one session log (CASES-RUN-....txt or TABLES-RUN-....txt) and one file per step.
+
+
+Route B: Termux (measures OpenJDK, not Android's runtime)
+---------------------------------------------------------
+1. Install Termux from F-Droid. In Termux:  pkg install openjdk-17 unzip
+2. termux-setup-storage    (once; allow access)
+3. Zip this folder, copy it to the phone's Downloads folder, then
+   cd ~ && unzip ~/storage/downloads/zkseries-phone-bench.zip && cd zkseries-phone-bench
+4. termux-wake-lock
+5. bash run-on-phone.sh cases     or     bash run-on-phone.sh tables
+   (cools down 3 minutes before every step)
+6. cp -r results ~/storage/downloads/
+
+
+Checks (in the output files)
+----------------------------
+- Every file header says "build variant : release" (Route A), never "DEBUG".
+- The check steps end with:  passed 144, failed 0.
+- In the CASES RUN, each case-study file shows five rows:
+    "blow, T=68 L=68"    N_m  512, bytes 768
+    "shake, T=50 L=146"  N_m 2048, bytes 896
+    "shake, T=97 L=193"  N_m 4096, bytes 960
+    "face, T=42 L=85"    N_m 4096, bytes 960
+    "face, T=44 L=87"    N_m 4096, bytes 960
+- No line says "FAILED".
+If a check fails, an old build is installed: uninstall the app, Rebuild, Run again.
+
+
+What the CASES RUN does
+-----------------------
+4 steps, each preceded by a cooldown (at least 2 minutes; then until Android's thermal
+status is "none" and the battery is within 1 C of its starting temperature; at most 15
+minutes):
+  1-2   the protocol checks, with 1 and 8 threads
+  3-4   the case studies (blow, shake, face) at their largest circuits, with 1 and
+        8 threads
+Every file records the phone's thermal state before and after its step. The TABLES RUN
+(Bench.tablesPlan, 24 steps) works the same way; the FINAL RUN button runs an earlier,
+larger plan that the paper no longer uses.
